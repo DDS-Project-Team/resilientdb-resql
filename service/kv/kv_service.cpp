@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <gflags/gflags.h>
 #include <glog/logging.h>
 
 #include <algorithm>
@@ -30,6 +31,9 @@
 #include "platform/config/resdb_config_utils.h"
 #include "platform/statistic/stats.h"
 #include "service/utils/server_factory.h"
+#ifdef ENABLE_DUCKDB
+#include "chain/storage/duckdb.h"
+#endif
 #ifdef ENABLE_LEVELDB
 #include "chain/storage/leveldb.h"
 #endif
@@ -41,6 +45,14 @@ void SignalHandler(int sig_num) {
   LOG(ERROR) << " signal:" << sig_num << " call"
              << " ======================";
 }
+
+void SignalHandler(int sig_num) {
+  LOG(ERROR) << " signal:" << sig_num << " call"
+             << " ======================";
+}
+
+DEFINE_string(storage_backend, "memory",
+              "Storage backend to use: memory|leveldb|duckdb");
 
 void ShowUsage() {
   printf("<config> <private_key> <cert_file> "
@@ -63,14 +75,22 @@ std::unique_ptr<Storage> NewStorage(const std::string& db_path,
     return NewResQL(path, duckdb_info);
   }
 #ifdef ENABLE_LEVELDB
-  LOG(INFO) << "use leveldb storage.";
-  return NewResLevelDB(db_path, config_data.leveldb_info());
+  if (backend == "leveldb") {
+    LOG(INFO) << "use leveldb storage.";
+    return NewResLevelDB(db_path, config_data.leveldb_info());
+  }
+#else
+  if (backend == "leveldb") {
+    LOG(FATAL) << "LevelDB backend requested but binary is not built with "
+                  "LevelDB. Rebuild with --define enable_leveldb=True.";
+  }
 #endif
   LOG(INFO) << "use memory storage.";
   return NewMemoryDB();
 }
 
 int main(int argc, char** argv) {
+  google::ParseCommandLineFlags(&argc, &argv, true);
   if (argc < 4) {
     ShowUsage();
     exit(0);
