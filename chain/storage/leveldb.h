@@ -66,6 +66,7 @@ class ResLevelDB : public Storage {
 
   std::vector<std::pair<std::string, int>> GetTopHistory(
       const std::string& key, int top_number) override;
+  std::string ExecuteSQL(const std::string& sql_string) override;    
 
   bool UpdateMetrics();
 

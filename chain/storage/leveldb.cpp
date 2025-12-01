@@ -329,6 +329,11 @@ std::vector<std::pair<std::string, int>> ResLevelDB::GetTopHistory(
 
   return resp;
 }
+std::string ResLevelDB::ExecuteSQL(const std::string& sql_string) {
+  // LevelDB backend doesn’t really support arbitrary SQL.
+  // For now, just return a clear “not supported” message.
+  return "ExecuteSQL not supported in LevelDB backend";
+}
 
 }  // namespace storage
 }  // namespace resdb

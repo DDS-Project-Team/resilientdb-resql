@@ -165,6 +165,11 @@ std::vector<std::pair<std::string, int>> MemoryDB::GetTopHistory(
   } while (it != search_it->second.begin());
   return resp;
 }
+std::string MemoryDB::ExecuteSQL(const std::string& sql_string) {
+  // For an in-memory KV backend, you probably don’t want to support
+  // general SQL. For now, just return a clear message.
+  return "ExecuteSQL not supported in MemoryDB backend";
+}
 
 }  // namespace storage
 }  // namespace resdb

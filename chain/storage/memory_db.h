@@ -78,6 +78,8 @@ class MemoryDB : public Storage {
   std::vector<std::pair<std::string, int>> GetTopHistory(const std::string& key,
                                                          int number) override;
 
+   // NEW: stub implementation of SQL execution for in-memory backend
+   std::string ExecuteSQL(const std::string& sql_string) override;                                                      
  private:
   std::unordered_map<std::string, std::string> kv_map_;
   std::unordered_map<std::string, std::list<std::pair<std::string, int>>>
