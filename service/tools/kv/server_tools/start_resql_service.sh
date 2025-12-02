@@ -31,18 +31,31 @@ WORK_PATH=$PWD
 CERT_PATH=${WORK_PATH}/service/tools/data/cert/
 
 # Always enable DuckDB with a default path per node.
-DEFAULT_DUCKDB_PATH=/tmp
+DEFAULT_DUCKDB_PATH=${WORK_PATH}
 EXTRA_FLAGS="--enable_duckdb"
+
+start_node() {
+  local node_id=$1
+  local port=$2
+  local key_file=$3
+  local cert_file=$4
+
+  local db_dir=${DEFAULT_DUCKDB_PATH}/${port}_db
+  mkdir -p "${db_dir}"
+  local db_path=${db_dir}/resdb.duckdb
+
+  nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/${key_file} $CERT_PATH/${cert_file} $EXTRA_FLAGS --duckdb_path=${db_path} > server${node_id}.log &
+}
 
 # No additional flag parsing; DuckDB is always enabled.
 bazel build //service/kv:kv_service
 
-nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/node1.key.pri $CERT_PATH/cert_1.cert $EXTRA_FLAGS --duckdb_path=${DEFAULT_DUCKDB_PATH}/resdb_node1.duckdb > server0.log &
-nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/node2.key.pri $CERT_PATH/cert_2.cert $EXTRA_FLAGS --duckdb_path=${DEFAULT_DUCKDB_PATH}/resdb_node2.duckdb > server1.log &
-nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/node3.key.pri $CERT_PATH/cert_3.cert $EXTRA_FLAGS --duckdb_path=${DEFAULT_DUCKDB_PATH}/resdb_node3.duckdb > server2.log &
-nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/node4.key.pri $CERT_PATH/cert_4.cert $EXTRA_FLAGS --duckdb_path=${DEFAULT_DUCKDB_PATH}/resdb_node4.duckdb > server3.log &
+start_node 0 10001 node1.key.pri cert_1.cert
+start_node 1 10002 node2.key.pri cert_2.cert
+start_node 2 10003 node3.key.pri cert_3.cert
+start_node 3 10004 node4.key.pri cert_4.cert
 
-# Optional client node
-nohup $SERVER_PATH $SERVER_CONFIG $CERT_PATH/node5.key.pri $CERT_PATH/cert_5.cert $EXTRA_FLAGS --duckdb_path=${DEFAULT_DUCKDB_PATH}/resdb_node5.duckdb > client.log &
+# Optional client node (uses a distinct DB path as well)
+start_node 4 10005 node5.key.pri cert_5.cert
 
 echo "Started KV service with DuckDB enabled."
