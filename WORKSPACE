@@ -22,17 +22,25 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "hedron_compile_commands",
+    strip_prefix = "bazel-compile-commands-extractor-4f28899228fb3ad0126897876f147ca15026151e",
     #Replace the commit hash (4f28899228fb3ad0126897876f147ca15026151e) with the latest commit hash from the repo
     url = "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/4f28899228fb3ad0126897876f147ca15026151e.tar.gz",
-    strip_prefix = "bazel-compile-commands-extractor-4f28899228fb3ad0126897876f147ca15026151e",
 )
+
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
+
 hedron_compile_commands_setup()
+
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
+
 hedron_compile_commands_setup_transitive()
+
 load("@hedron_compile_commands//:workspace_setup_transitive_transitive.bzl", "hedron_compile_commands_setup_transitive_transitive")
+
 hedron_compile_commands_setup_transitive_transitive()
+
 load("@hedron_compile_commands//:workspace_setup_transitive_transitive_transitive.bzl", "hedron_compile_commands_setup_transitive_transitive_transitive")
+
 hedron_compile_commands_setup_transitive_transitive_transitive()
 
 load("//:repositories.bzl", "nexres_repositories")
@@ -169,6 +177,9 @@ http_archive(
     sha256 = "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9",
     strip_prefix = "zlib-1.2.12",
     urls = [
+        "https://zlib.net/fossils/zlib-1.2.12.tar.gz",
+        "https://downloads.sourceforge.net/project/libpng/zlib/1.2.12/zlib-1.2.12.tar.gz",
+        "https://zlib.net/fossils/zlib-1.2.12.tar.gz",
         "https://storage.googleapis.com/bazel-mirror/zlib.net/zlib-1.2.12.tar.gz",
     ],
 )
@@ -180,6 +191,19 @@ http_archive(
     strip_prefix = "leveldb-1.23",
     url = "https://github.com/google/leveldb/archive/refs/tags/1.23.zip",
 )
+http_archive(
+    name = "duckdb",
+    urls = [
+        # pick one version and stick to it
+        "https://github.com/duckdb/duckdb/releases/download/v1.4.0/libduckdb-src.zip",
+    ],
+    # This zip is just flat: duckdb.cpp, duckdb.hpp, duckdb.h at the root.
+    # So no strip_prefix is needed.
+    build_file = "//third_party:duckdb.BUILD",
+    # Optional: you can add sha256 once Bazel prints it for you.
+    # sha256 = "<FILL_ME_FROM_BAZEL_ERROR>",
+)
+
 
 bind(
     name = "snappy",
@@ -210,7 +234,7 @@ http_archive(
 http_archive(
     name = "pybind11_bazel",
     strip_prefix = "pybind11_bazel-2.11.1.bzl.1",
-    urls = ["https://github.com/pybind/pybind11_bazel/archive/refs/tags/v2.11.1.bzl.1.zip"]
+    urls = ["https://github.com/pybind/pybind11_bazel/archive/refs/tags/v2.11.1.bzl.1.zip"],
 )
 
 http_archive(

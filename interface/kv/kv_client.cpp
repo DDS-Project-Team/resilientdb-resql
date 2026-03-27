@@ -47,18 +47,6 @@ std::unique_ptr<std::string> KVClient::Get(const std::string& key) {
   return std::make_unique<std::string>(response.value());
 }
 
-std::unique_ptr<std::string> KVClient::GetAllValues() {
-  KVRequest request;
-  request.set_cmd(KVRequest::GETALLVALUES);
-  KVResponse response;
-  int ret = SendRequest(request, &response);
-  if (ret != 0) {
-    LOG(ERROR) << "send request fail, ret:" << ret;
-    return nullptr;
-  }
-  return std::make_unique<std::string>(response.value());
-}
-
 std::unique_ptr<std::string> KVClient::GetRange(const std::string& min_key,
                                                 const std::string& max_key) {
   KVRequest request;
@@ -143,6 +131,32 @@ std::unique_ptr<Items> KVClient::GetKeyTopHistory(const std::string& key,
     return nullptr;
   }
   return std::make_unique<Items>(response.items());
+}
+
+std::unique_ptr<std::string> KVClient::ExecuteSQL(const std::string& sql_query) {
+  if (sql_query.empty()) {
+    LOG(ERROR) << "SQL query is empty";
+    return nullptr;
+  }
+
+  KVRequest request;
+  request.set_cmd(KVRequest::SQL);
+  request.set_sql_query(sql_query);
+
+  KVResponse response;
+  int ret = SendRequest(request, &response);
+  if (ret != 0) {
+    LOG(ERROR) << "send SQL request fail, ret:" << ret;
+    return nullptr;
+  }
+
+  if (!response.sql_response().empty()) {
+    return std::make_unique<std::string>(response.sql_response());
+  }
+  if (!response.value().empty()) {
+    return std::make_unique<std::string>(response.value());
+  }
+  return std::make_unique<std::string>();
 }
 
 }  // namespace resdb
